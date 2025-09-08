@@ -19,6 +19,7 @@ $get_msg['de'] = '<br>
     <div style="max-width: 500px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background-color: #f9f9f9;">
         <h1 style="font-family: Arial, sans-serif; font-size: 24px; color: #333; margin-bottom: 15px;">Bitte bestätigen Sie, dass Sie ein Mensch sind</h1>
         <p style="font-family: Arial, sans-serif; font-size: 16px; color: #555; margin-bottom: 20px;">Um fortzufahren, lösen Sie bitte das Captcha unten:</p>
+        {error_message}
         <form method="POST" action="{curpagename}">
             <input type="hidden" name="query_string" value="{query_string}">
             <input type="hidden" name="actionname" value="{actionname}" />
@@ -20890,13 +20891,14 @@ function curPathURL()
     return $pageURL;
 }
 
-function blocked($get_msg, $langcode, $lang_output, $actionname)
+function blocked($get_msg, $langcode, $lang_output, $actionname, $error_message = '')
 {
     $data    = array(
         'lang_output' => $lang_output,
         'curPageName' => curPageName(),
         'actionname' => $actionname,
-        'query_string' => $_SERVER['QUERY_STRING']
+        'query_string' => $_SERVER['QUERY_STRING'],
+        'error_message' => $error_message ? '<div style="color: red; font-weight: bold; margin-bottom: 15px; padding: 10px; background-color: #ffe6e6; border: 1px solid #ff9999; border-radius: 5px;">Falsche Antwort! Bitte versuchen Sie es erneut.</div>' : ''
     );
     $content = replace_vars($get_msg[$langcode], $data);
     header("HTTP/1.0 404 Not Found");
@@ -20922,20 +20924,30 @@ if (isset($_SESSION['actionname']) AND isset($_POST['actionname'])) {
     
     if ($_SESSION['actionname'] == $_POST['actionname']) {
         
-        $fh = fopen($wl_filename, 'a');
-        fwrite($fh, $requester_IP . "\n");
-        fclose($fh);
-        
-        $_SESSION = array();
-        $_COOKIE  = array();
-        session_destroy();
-        
-        if (!empty($_POST['query_string'])) {
-            header('Location: ' . curPathURL() . curPageName() . '?' . $_POST['query_string']);
+        // Check if captcha answer is correct (3 + 4 = 7)
+        if (isset($_POST['captcha']) && trim($_POST['captcha']) === '7') {
+            
+            $fh = fopen($wl_filename, 'a');
+            fwrite($fh, $requester_IP . "\n");
+            fclose($fh);
+            
+            $_SESSION = array();
+            $_COOKIE  = array();
+            session_destroy();
+            
+            if (!empty($_POST['query_string'])) {
+                header('Location: ' . curPathURL() . curPageName() . '?' . $_POST['query_string']);
+            } else {
+                header('Location: ' . curPathURL() . curPageName());
+            }
+            die();
+            
         } else {
-            header('Location: ' . curPathURL() . curPageName());
+            // Captcha answer is wrong, show error and regenerate actionname
+            $actionname = '.ht_' . uniqid();
+            $_SESSION['actionname'] = $actionname;
+            blocked($get_msg, $langcode, $lang_output, $actionname, 'wrong_answer');
         }
-        die();
         
     } else {
         

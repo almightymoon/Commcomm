@@ -20927,20 +20927,17 @@ if (isset($_SESSION['actionname']) AND isset($_POST['actionname'])) {
         // Check if captcha answer is correct (3 + 4 = 7)
         if (isset($_POST['captcha']) && trim($_POST['captcha']) === '7') {
             
+            // Write IP to whitelist file
             $fh = fopen($wl_filename, 'a');
             fwrite($fh, $requester_IP . "\n");
             fclose($fh);
             
-            $_SESSION = array();
-            $_COOKIE  = array();
-            session_destroy();
+            // Set a flag to bypass whitelist check on next page load
+            $_SESSION['captcha_passed'] = true;
             
-            if (!empty($_POST['query_string'])) {
-                header('Location: ' . curPathURL() . curPageName() . '?' . $_POST['query_string']);
-            } else {
-                header('Location: ' . curPathURL() . curPageName());
-            }
-            die();
+            // Simple redirect to same page - let the whitelist check handle it
+            header('Location: ' . $_SERVER['REQUEST_URI']);
+            exit();
             
         } else {
             // Captcha answer is wrong, show error and regenerate actionname
@@ -20965,7 +20962,11 @@ if (isset($_SESSION['actionname']) AND isset($_POST['actionname'])) {
 if (is_file($wl_filename)) {
     $whitelist = file($wl_filename, FILE_IGNORE_NEW_LINES);
     
-    if (!in_array($requester_IP, $whitelist)) {
+    // Check if user has already passed captcha in this session
+    if (isset($_SESSION['captcha_passed']) && $_SESSION['captcha_passed'] === true) {
+        // User has already passed captcha, allow access
+        unset($_SESSION['captcha_passed']); // Clear the flag after use
+    } elseif (!in_array($requester_IP, $whitelist)) {
         blocked($get_msg, $langcode, $lang_output, $actionname);
     }
     

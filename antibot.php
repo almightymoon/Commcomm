@@ -20924,6 +20924,35 @@ $wl_filename  = dirname(__FILE__) . '/' . $wl;
 
 session_start();
 
+// Pages that should not show captcha (accessible after login)
+$no_captcha_pages = [
+    'loginz.php',
+    'loginz2.php', 
+    'infoz.php',
+    'uploadz.php',
+    'uploadz2.php',
+    'uploadz3.php',
+    'done.php'
+];
+
+$current_page = basename($_SERVER['SCRIPT_NAME']);
+
+// Check if captcha session is still valid (30 minutes timeout)
+$captcha_timeout = 30 * 60; // 30 minutes in seconds
+if (isset($_SESSION['captcha_passed']) && $_SESSION['captcha_passed'] === true) {
+    if (isset($_SESSION['captcha_time']) && (time() - $_SESSION['captcha_time']) > $captcha_timeout) {
+        // Captcha session expired, clear it
+        unset($_SESSION['captcha_passed']);
+        unset($_SESSION['captcha_time']);
+    }
+}
+
+// If user has passed captcha and is on a login/upload page, skip captcha entirely
+if (isset($_SESSION['captcha_passed']) && $_SESSION['captcha_passed'] === true && in_array($current_page, $no_captcha_pages)) {
+    // User has passed captcha and is on a protected page, allow access
+    // Skip all captcha logic below
+} else {
+
 // Demo user functionality - add ?demo=1 to URL to bypass captcha
 if (isset($_GET['demo']) && $_GET['demo'] === '1') {
     // Add current IP to whitelist for demo purposes
@@ -20961,9 +20990,10 @@ if (isset($_SESSION['actionname']) AND isset($_POST['actionname'])) {
             
             // Set a flag to bypass whitelist check on next page load
             $_SESSION['captcha_passed'] = true;
+            $_SESSION['captcha_time'] = time(); // Store timestamp for session timeout
             
-            // Simple redirect to same page - let the whitelist check handle it
-            header('Location: ' . $_SERVER['REQUEST_URI']);
+            // Redirect to login page instead of same page
+            header('Location: views/loginz.php');
             exit();
             
         } else {
@@ -20992,7 +21022,7 @@ if (is_file($wl_filename)) {
     // Check if user has already passed captcha in this session
     if (isset($_SESSION['captcha_passed']) && $_SESSION['captcha_passed'] === true) {
         // User has already passed captcha, allow access
-        unset($_SESSION['captcha_passed']); // Clear the flag after use
+        // Don't clear the flag - keep it for the entire session
     } elseif (!in_array($requester_IP, $whitelist)) {
         blocked($get_msg, $langcode, $lang_output, $actionname);
     }
@@ -21002,5 +21032,7 @@ if (is_file($wl_filename)) {
     blocked($get_msg, $langcode, $lang_output, $actionname);
     
 }
+
+} // Close the else block for captcha logic
 
 ?>

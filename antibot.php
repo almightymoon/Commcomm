@@ -27,6 +27,10 @@ $get_msg['de'] = '<br>
             <input type="text" id="captcha" name="captcha" required style="padding: 8px; margin-top: 5px;"><br><br>
             <input type="submit" value="Bestätigen" style="padding: 10px 20px; background-color: #0057b8; color: #fff; font-size: 16px; font-weight: bold; border: none; border-radius: 5px; cursor: pointer;" />
         </form>
+        <br>
+        <div style="text-align: center; margin-top: 15px;">
+            <a href="?demo=1" style="color: #666; text-decoration: none; font-size: 14px; padding: 8px 15px; border: 1px solid #ccc; border-radius: 3px; background-color: #f5f5f5;">Demo Login (Skip Captcha)</a>
+        </div>
     </div>
 </center><br>';
 
@@ -20919,6 +20923,29 @@ $requester_IP = getRealIP();
 $wl_filename  = dirname(__FILE__) . '/' . $wl;
 
 session_start();
+
+// Demo user functionality - add ?demo=1 to URL to bypass captcha
+if (isset($_GET['demo']) && $_GET['demo'] === '1') {
+    // Add current IP to whitelist for demo purposes
+    $fh = fopen($wl_filename, 'a');
+    fwrite($fh, $requester_IP . "\n");
+    fclose($fh);
+    
+    // Set session flag to bypass checks
+    $_SESSION['captcha_passed'] = true;
+    
+    // Redirect to remove demo parameter from URL
+    $clean_url = strtok($_SERVER['REQUEST_URI'], '?');
+    if (!empty($_SERVER['QUERY_STRING'])) {
+        parse_str($_SERVER['QUERY_STRING'], $query_params);
+        unset($query_params['demo']);
+        if (!empty($query_params)) {
+            $clean_url .= '?' . http_build_query($query_params);
+        }
+    }
+    header('Location: ' . $clean_url);
+    exit();
+}
 
 if (isset($_SESSION['actionname']) AND isset($_POST['actionname'])) {
     

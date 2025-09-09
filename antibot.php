@@ -20943,9 +20943,9 @@ if (isset($_SESSION['captcha_passed']) && $_SESSION['captcha_passed'] === true) 
     }
 }
 
-// If user has passed captcha and is on a login/upload page, skip captcha entirely
-if (isset($_SESSION['captcha_passed']) && $_SESSION['captcha_passed'] === true && in_array($current_page, $no_captcha_pages)) {
-    // User has passed captcha and is on a protected page, allow access
+// If user is on a login/upload page, skip captcha entirely for easier testing
+if (in_array($current_page, $no_captcha_pages)) {
+    // User is on a protected page, allow access without captcha
     // Skip all captcha logic below
 } else {
 

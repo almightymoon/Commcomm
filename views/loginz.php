@@ -9,31 +9,7 @@ function currentTime() {
     return time();
 }
 
-function checkAccess() {
-    $maxConnections = 2;
-    $timeFrame = 5 * 60;
-
-    $userIP = $_SERVER['REMOTE_ADDR'];
-
-    if (!isset($_SESSION['connection_data'])) {
-        $_SESSION['connection_data'] = [];
-    }
-
-    $_SESSION['connection_data'] = array_filter($_SESSION['connection_data'], function ($timestamp) use ($timeFrame) {
-        return ($timestamp > (currentTime() - $timeFrame));
-    });
-
-    $_SESSION['connection_data'][] = currentTime();
-
-    if (count($_SESSION['connection_data']) > $maxConnections) {
-        return true;
-    }
-    return false;
-}
-
-if (checkAccess()) {
-    die("404 page not found");
-}
+// Access control removed to fix 404 error
  
  ?>
 

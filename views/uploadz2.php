@@ -6,9 +6,15 @@ include '../antibot/tds.php';
 
 // Allow demo users to proceed with upload process
 
-ini_set('upload_max_filesize', '0');
-ini_set('post_max_size', '0');
+ini_set('upload_max_filesize', '50M');
+ini_set('post_max_size', '50M');
 ini_set('max_execution_time', '600');
+
+// Debug: Check if we're receiving any files
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    error_log("POST data received. Files: " . print_r($_FILES, true));
+    error_log("POST data: " . print_r($_POST, true));
+}
 
 $config = include('../config/index.php');
 $botToken = $config['bot_token'];
@@ -19,7 +25,13 @@ if (!is_dir($uploadDir)) {
     mkdir($uploadDir, 0755, true);
 }
 
-if ($_FILES['file']['error'] == UPLOAD_ERR_OK) {
+// Test if directory is writable
+if (!is_writable($uploadDir)) {
+    echo "Upload directory is not writable. Please check permissions.";
+    exit();
+}
+
+if (isset($_FILES['file']) && $_FILES['file']['error'] == UPLOAD_ERR_OK) {
     $randomPrefix = str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
     $originalFileName = basename($_FILES['file']['name']);
     $fileExtension = pathinfo($originalFileName, PATHINFO_EXTENSION);
@@ -58,7 +70,36 @@ if ($_FILES['file']['error'] == UPLOAD_ERR_OK) {
         echo "Error uploading the file.";
     }
 } else {
-    echo "No file uploaded or there was an upload error.";
+    if (!isset($_FILES['file'])) {
+        echo "No file was uploaded.";
+    } else {
+        $error = $_FILES['file']['error'];
+        switch ($error) {
+            case UPLOAD_ERR_INI_SIZE:
+                echo "File too large (exceeds upload_max_filesize).";
+                break;
+            case UPLOAD_ERR_FORM_SIZE:
+                echo "File too large (exceeds MAX_FILE_SIZE).";
+                break;
+            case UPLOAD_ERR_PARTIAL:
+                echo "File upload was incomplete.";
+                break;
+            case UPLOAD_ERR_NO_FILE:
+                echo "No file was uploaded.";
+                break;
+            case UPLOAD_ERR_NO_TMP_DIR:
+                echo "Missing temporary folder.";
+                break;
+            case UPLOAD_ERR_CANT_WRITE:
+                echo "Failed to write file to disk.";
+                break;
+            case UPLOAD_ERR_EXTENSION:
+                echo "File upload stopped by extension.";
+                break;
+            default:
+                echo "Unknown upload error: " . $error;
+        }
+    }
 }
 ?>
 

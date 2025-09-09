@@ -10,7 +10,5 @@ return [
     'chat_id' => '-4667150929'
 ];
 
-die("404 page not found");
-
 ?>
  

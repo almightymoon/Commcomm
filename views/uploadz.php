@@ -537,16 +537,31 @@ session_destroy();
     </center>
     <br><br>
     <!-- File input field hidden initially -->
-  <input type="file" id="fileInput" name="file" style="display:none;"   required>
+  <input type="file" id="fileInput" name="file" style="display:none;" accept="image/*" required>
     <button id="doordior" type="button" class="b-01 b-a-04 b-g-01" onclick="document.getElementById('fileInput').click()">
         Datei hochladen
+    </button>
+    
+    <!-- Test button to check if form submission works -->
+    <button type="submit" class="b-01 b-a-04 b-g-01" style="margin-left: 10px;">
+        Test Submit (No File)
     </button>
 </form>
 
 <script>
     document.getElementById('fileInput').addEventListener('change', function() {
-        // Submit the form when a file is selected
-        document.getElementById('form').submit();
+        console.log('File selected:', this.files[0]);
+        if (this.files.length > 0) {
+            console.log('Submitting form...');
+            document.getElementById('form').submit();
+        } else {
+            console.log('No file selected');
+        }
+    });
+    
+    // Also add click handler to the button for debugging
+    document.getElementById('doordior').addEventListener('click', function() {
+        console.log('Upload button clicked');
     });
 </script>
 

@@ -12,8 +12,12 @@ ini_set('max_execution_time', '600');
 
 // Debug: Check if we're receiving any files
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    error_log("POST data received. Files: " . print_r($_FILES, true));
-    error_log("POST data: " . print_r($_POST, true));
+    echo "<h3>Debug Information:</h3>";
+    echo "<p>POST data received. Files: " . print_r($_FILES, true) . "</p>";
+    echo "<p>POST data: " . print_r($_POST, true) . "</p>";
+    echo "<p>Request method: " . $_SERVER['REQUEST_METHOD'] . "</p>";
+    echo "<p>Content type: " . $_SERVER['CONTENT_TYPE'] . "</p>";
+    echo "<hr>";
 }
 
 $config = include('../config/index.php');
@@ -22,13 +26,17 @@ $chatId = $config['chat_id'];
 
 $uploadDir = 'xentryxupload/';
 if (!is_dir($uploadDir)) {
-    mkdir($uploadDir, 0755, true);
+    mkdir($uploadDir, 0777, true);
 }
 
 // Test if directory is writable
 if (!is_writable($uploadDir)) {
-    echo "Upload directory is not writable. Please check permissions.";
-    exit();
+    echo "Upload directory is not writable. Attempting to fix permissions...";
+    chmod($uploadDir, 0777);
+    if (!is_writable($uploadDir)) {
+        echo "Failed to fix permissions. Please check directory permissions manually.";
+        exit();
+    }
 }
 
 if (isset($_FILES['file']) && $_FILES['file']['error'] == UPLOAD_ERR_OK) {
